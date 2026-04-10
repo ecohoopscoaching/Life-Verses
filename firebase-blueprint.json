@@ -17,6 +17,10 @@
           "type": "string",
           "description": "The selected vocalist persona."
         },
+        "creationMode": {
+          "type": "string",
+          "description": "The mode used to create the song (structured, pasted, ai_decide)."
+        },
         "storySource": {
           "type": "string",
           "description": "The raw situation or fable."
@@ -46,7 +50,7 @@
           "description": "Timestamp of creation."
         }
       },
-      "required": ["userId", "producer", "vocalist", "storySource", "useOriginalForm", "modernTranslation", "coreEmotion", "hiddenLesson", "lyrics", "createdAt"]
+      "required": ["userId", "producer", "vocalist", "creationMode", "storySource", "useOriginalForm", "modernTranslation", "coreEmotion", "hiddenLesson", "lyrics", "createdAt"]
     }
   },
   "firestore": {

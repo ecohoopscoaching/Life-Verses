@@ -5,15 +5,43 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 export const generateSong = async (
   producer: string,
   vocalist: string,
+  creationMode: string,
   storySource: string,
   useOriginalForm: boolean,
   modernTranslation: string,
   coreEmotion: string,
   hiddenLesson: string
 ) => {
-  const settingInstruction = useOriginalForm 
-    ? `Setting: Original Fable/Story (Do NOT modernize. Write from the perspective of the original characters/animals/setting, but keep the emotional depth and serious tone.)`
-    : `Modern Translation: ${modernTranslation}`;
+  let vibeSection = '';
+  
+  if (creationMode === 'ai_decide') {
+    vibeSection = `
+2. THE VIBE AND HEART
+Instructions: Invent a completely original story, scenario, or fable. You decide the setting, the characters, and the plot.
+Core Emotion: ${coreEmotion === 'Surprise Me' ? 'Choose a powerful emotion' : coreEmotion}
+The Hidden Lesson: Invent a profound hidden lesson that the listener will realize through the story.
+`;
+  } else if (creationMode === 'pasted') {
+    vibeSection = `
+2. THE VIBE AND HEART
+Story Source: ${storySource}
+Instructions: Adapt the story provided above into a song.
+Core Emotion: ${coreEmotion === 'Surprise Me' ? 'Choose a powerful emotion' : coreEmotion}
+The Hidden Lesson: Extract a meaningful hidden lesson from the provided story.
+`;
+  } else {
+    const settingInstruction = useOriginalForm 
+      ? `Setting: Original Fable/Story (Do NOT modernize. Write from the perspective of the original characters/animals/setting, but keep the emotional depth and serious tone.)`
+      : `Modern Translation: ${modernTranslation}`;
+      
+    vibeSection = `
+2. THE VIBE AND HEART
+Story Source: ${storySource}
+${settingInstruction}
+Core Emotion: ${coreEmotion}
+The Hidden Lesson: ${hiddenLesson}
+`;
+  }
 
   const prompt = `You are the master songwriter and A&R for "Life Verses". Your job is to build a song concept and write the lyrics. You are also a Creative Director and Songwriting Coach who has worked with platinum-selling Rap and R&B artists.
 
@@ -24,13 +52,7 @@ CORE RULE: Life Verses turns timeless fables, real life struggles, and psycholog
 1. THE SOUND (PRODUCER & VOCALIST)
 Producer Persona: ${producer}
 Vocalist Persona: ${vocalist}
-
-2. THE VIBE AND HEART
-Story Source: ${storySource}
-${settingInstruction}
-Core Emotion: ${coreEmotion}
-The Hidden Lesson: ${hiddenLesson}
-
+${vibeSection}
 3. THE LYRICS & SONGWRITING COACHING
 Write the full song lyrics using these exact psychological and narrative techniques to create a deep emotional connection. Focus on the "human" element.
 

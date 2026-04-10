@@ -3,6 +3,7 @@ export interface Song {
   userId: string;
   producer: string;
   vocalist: string;
+  creationMode: string;
   storySource: string;
   useOriginalForm: boolean;
   modernTranslation: string;
