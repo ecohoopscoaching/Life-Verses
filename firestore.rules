@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: songs
+    // Document ID: auto-generated
+    // Fields:
+    //   - userId: string (required, immutable) - The UID of the user who created the song.
+    //   - producer: string (required) - The selected producer persona.
+    //   - vocalist: string (required) - The selected vocalist persona.
+    //   - storySource: string (required) - The raw situation or fable.
+    //   - useOriginalForm: boolean (required) - Whether to use the original story form.
+    //   - modernTranslation: string (required) - How this looks in the real world today.
+    //   - coreEmotion: string (required) - One driving word like pain, pride, grief, hope, rage, or love.
+    //   - hiddenLesson: string (required) - What the listener should realize on their own.
+    //   - lyrics: string (required) - The generated lyrics.
+    //   - createdAt: number (required, immutable) - Timestamp of creation.
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    function uidUnchanged() {
+      return !('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid;
+    }
+    
+    function uidNotModified() {
+      return !('userId' in request.resource.data) || request.resource.data.userId == resource.data.userId;
+    }
+    
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+    
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Domain Validators
+    function isValidSong(data) {
+      return hasOnlyAllowedFields(['userId', 'producer', 'vocalist', 'storySource', 'useOriginalForm', 'modernTranslation', 'coreEmotion', 'hiddenLesson', 'lyrics', 'createdAt']) &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.producer is string && data.producer.size() > 0 && data.producer.size() < 100 &&
+             data.vocalist is string && data.vocalist.size() > 0 && data.vocalist.size() < 100 &&
+             data.storySource is string && data.storySource.size() > 0 && data.storySource.size() < 1000 &&
+             data.useOriginalForm is bool &&
+             data.modernTranslation is string && data.modernTranslation.size() >= 0 && data.modernTranslation.size() < 1000 &&
+             data.coreEmotion is string && data.coreEmotion.size() > 0 && data.coreEmotion.size() < 100 &&
+             data.hiddenLesson is string && data.hiddenLesson.size() > 0 && data.hiddenLesson.size() < 1000 &&
+             data.lyrics is string && data.lyrics.size() > 0 && data.lyrics.size() < 20000 &&
+             data.createdAt is number;
+    }
+
+    match /songs/{songId} {
+      allow read: if isAuthenticated() && isDocOwner();
+      allow create: if isAuthenticated() && isValidSong(request.resource.data) && uidUnchanged();
+      allow update: if isAuthenticated() && isDocOwner() && isValidSong(request.resource.data) && uidNotModified() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+  }
+}

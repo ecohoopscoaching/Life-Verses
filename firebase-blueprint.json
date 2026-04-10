@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "Song": {
+      "title": "Song",
+      "description": "A generated Life Verses song.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who created the song."
+        },
+        "producer": {
+          "type": "string",
+          "description": "The selected producer persona."
+        },
+        "vocalist": {
+          "type": "string",
+          "description": "The selected vocalist persona."
+        },
+        "storySource": {
+          "type": "string",
+          "description": "The raw situation or fable."
+        },
+        "useOriginalForm": {
+          "type": "boolean",
+          "description": "Whether to use the original story form instead of a modern translation."
+        },
+        "modernTranslation": {
+          "type": "string",
+          "description": "How this looks in the real world today."
+        },
+        "coreEmotion": {
+          "type": "string",
+          "description": "One driving word like pain, pride, grief, hope, rage, or love."
+        },
+        "hiddenLesson": {
+          "type": "string",
+          "description": "What the listener should realize on their own."
+        },
+        "lyrics": {
+          "type": "string",
+          "description": "The generated lyrics."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp of creation."
+        }
+      },
+      "required": ["userId", "producer", "vocalist", "storySource", "useOriginalForm", "modernTranslation", "coreEmotion", "hiddenLesson", "lyrics", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/songs/{songId}": {
+      "schema": { "$ref": "#/entities/Song" },
+      "description": "Stores generated songs for users."
+    }
+  }
+}
